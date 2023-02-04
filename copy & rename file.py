@@ -15,12 +15,17 @@ def copy_and_rename_file(root_dir, dest_dir):
                     date_match = re.search(r'[A-Za-z]+ \d{1,2}, \d{4}', content)
                     if date_match:
                         date = date_match.group(0)
-                        date_without_time = re.sub(r'\s+\d{1,2}:\d{2}\s[APM]+$', '', date)
-                        if date_without_time:
-                            date = date_without_time
-                        else:
-                            date = "Update_" + date
-                        new_date = date.replace(", ", "_").replace(" ", "_")
+                        print(f"Date: {date}")  # Debugging statement
+                        
+                        date_parts = date.split()
+                        month = date_parts[0]
+                        day = date_parts[1].strip(',')
+                        year = date_parts[2]
+                        format_date = f"{year}_{month}_{day}"
+                        print(f"Format_Date: {format_date}")  # Debugging statement
+                         
+                        
+                        """                       
                         session_match = re.search(r'(back|biceps|chest|deltoid|forearm|legs_1|legs_2|push_1|push_2|pull_1|pull_2|triceps|abdominals)', path.name)
                         if session_match:
                             session = session_match.group(0)
@@ -31,7 +36,7 @@ def copy_and_rename_file(root_dir, dest_dir):
                             if not dest_file_path.exists():
                                 shutil.copy2(path, dest_file_path)
                                 print(f"Copied {path.name} to {dest_file_path}")
-                                log.write(f"{new_date},{notion_export_id}\n")
+                                log.write(f"{new_date},{notion_export_id}\n")"""
             except FileNotFoundError as e:
                 print(f"Error: {e}")
 
