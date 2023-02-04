@@ -23,20 +23,20 @@ def copy_and_rename_file(root_dir, dest_dir):
                         year = date_parts[2]
                         format_date = f"{year}_{month}_{day}"
                         print(f"Format_Date: {format_date}")  # Debugging statement
-                         
+                                            
+                        session_match = re.search(r'(back|biceps|chest|deltoid|forearm|legs 1|legs 2|push 1|push 2|pull 1|pull 2|triceps|abdominals)', path.name, re.IGNORECASE)
+                        print(f"Session_Match: {session_match}")  # Debugging statement
                         
-                        """                       
-                        session_match = re.search(r'(back|biceps|chest|deltoid|forearm|legs_1|legs_2|push_1|push_2|pull_1|pull_2|triceps|abdominals)', path.name)
                         if session_match:
                             session = session_match.group(0)
-                            notion_export_id = path.name.split("_")[-1].split(".")[0]
-                            new_filename = new_date + "_" + session + ".csv"
+                            new_filename = format_date + "_" + session + ".csv"
+                            notion_export_id = path.name.split('_')[-1]
                             dest_path = Path(dest_dir)
                             dest_file_path = dest_path / new_filename
                             if not dest_file_path.exists():
                                 shutil.copy2(path, dest_file_path)
                                 print(f"Copied {path.name} to {dest_file_path}")
-                                log.write(f"{new_date},{notion_export_id}\n")"""
+                                log.write(f"{format_date},{notion_export_id}\n")
             except FileNotFoundError as e:
                 print(f"Error: {e}")
 
