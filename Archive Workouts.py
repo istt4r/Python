@@ -20,6 +20,7 @@ month_map = {
     "December": "12"
 }
 
+# Restructures default date format into: YYYY_MM_DD
 def format_date_string(date_match):
     date = date_match.group(0)
     date_parts = date.split()
@@ -31,7 +32,7 @@ def format_date_string(date_match):
     format_date = f"{year}_{month_num}_{day}"
     return format_date
 
-
+# Explores directory for .csv files, extracts the date, renames the file, and copies it to an archive location.
 def archive_workout(root_dir, dest_dir):
     root = Path(root_dir)
     log_path = Path(dest_dir) / "Log.txt"
@@ -44,11 +45,9 @@ def archive_workout(root_dir, dest_dir):
                     content = f.read()
                     date_match = re.search(r'[A-Za-z]+ \d{1,2}, \d{4}', content)
                     if date_match:
-                        format_date = format_date_string(date_match)
-                        print(f"Date: {format_date}")
-                                            
+                        format_date = format_date_string(date_match)                  
                         session_match = re.search(r'^(.*?)\b[0-9a-f]{32}\b', path.name, re.IGNORECASE)
-                        print(f"Session_Match: {session_match}")
+                        print(f"Date: {format_date}, Session_Match: {session_match}")
                         
                         if session_match:
                             session = session_match.group(1)
@@ -56,14 +55,32 @@ def archive_workout(root_dir, dest_dir):
                             notion_export_id = path.name.split('_')[-1]
                             dest_path = Path(dest_dir)
                             dest_file_path = dest_path / new_filename
-                            if not dest_file_path.exists():
+                            
+                            if dest_file_path.exists():
+                                print("File already exists")
+                            else:
                                 shutil.copy2(path, dest_file_path)
                                 print(f"Copied {path.name} to {dest_file_path}")
                                 log.write(f"{format_date},{notion_export_id}\n")
             except FileNotFoundError as e:
                 print(f"Error: {e}")
 
+# Sorts the lines logged to Log.txt in order of descending date
+def sort_log_file(dest_dir):
+    log_path = Path(dest_dir) / "Log.txt"
+
+    with open(log_path, "r") as log:
+        lines = log.readlines()
+        
+    lines = [line.strip().split(',') for line in lines]
+    lines = sorted(lines, key=lambda x: x[0], reverse=True)
+    lines = [','.join(line) + '\n' for line in lines]
+
+    with open(log_path, "w") as log:
+        log.writelines(lines)
+
 root_dir = ROOT_DIR
 dest_dir = DEST_DIR
 
 archive_workout(root_dir, dest_dir)
+sort_log_file(dest_dir)
