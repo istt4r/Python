@@ -44,6 +44,7 @@ def write_log_file(log_path,data):
 
 write_log_file(EXPORT_LOG_PATH,data)
 
+# Put on hold, while deciphering Notion API documentation...
 """
 # Check if the request was successful
 if response.status_code == 200:
