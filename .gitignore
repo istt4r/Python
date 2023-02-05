@@ -1,3 +1,4 @@
 config.py
 myenv/
 test.py
+credentials.json
