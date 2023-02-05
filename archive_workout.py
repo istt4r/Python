@@ -1,8 +1,7 @@
 from pathlib import Path
 import shutil
 import re
-
-from config import ROOT_DIR, DEST_DIR
+from config import ROOT_DIR, DEST_DIR, ARCHIVE_LOG_PATH
 
 # Create a dictionary to map month names to their numerical values
 month_map = {
@@ -32,11 +31,22 @@ def format_date_string(date_match):
     format_date = f"{year}_{month_num}_{day}"
     return format_date
 
-# Explores directory for .csv files, extracts the date, renames the file, and copies it to an archive location.
-def archive_workout(root_dir, dest_dir):
-    root = Path(root_dir)
-    log_path = Path(dest_dir) / "Log.txt"
+# Sorts the lines logged to Log.txt in order of descending date
+def sort_log_file(log_path):
+    with open(log_path, "r") as log:
+        lines = log.readlines()
+        
+    lines = [line.strip().split(',') for line in lines]
+    lines = sorted(lines, key=lambda x: x[0], reverse=True)
+    lines = [','.join(line) + '\n' for line in lines]
 
+    with open(log_path, "w") as log:
+        log.writelines(lines)
+
+# Explores directory for .csv files, extracts the date, renames the file, and copies it to an archive location.
+def archive_workout(root_dir, dest_dir,log_path):
+    root = Path(root_dir)
+    
     with open(log_path, "w", encoding="utf-8") as log:
         for path in root.rglob('*.csv'):
             try:
@@ -65,22 +75,5 @@ def archive_workout(root_dir, dest_dir):
             except FileNotFoundError as e:
                 print(f"Error: {e}")
 
-# Sorts the lines logged to Log.txt in order of descending date
-def sort_log_file(dest_dir):
-    log_path = Path(dest_dir) / "Log.txt"
-
-    with open(log_path, "r") as log:
-        lines = log.readlines()
-        
-    lines = [line.strip().split(',') for line in lines]
-    lines = sorted(lines, key=lambda x: x[0], reverse=True)
-    lines = [','.join(line) + '\n' for line in lines]
-
-    with open(log_path, "w") as log:
-        log.writelines(lines)
-
-root_dir = ROOT_DIR
-dest_dir = DEST_DIR
-
-archive_workout(root_dir, dest_dir)
-sort_log_file(dest_dir)
+archive_workout(ROOT_DIR, DEST_DIR,ARCHIVE_LOG_PATH)
+sort_log_file(ARCHIVE_LOG_PATH)
