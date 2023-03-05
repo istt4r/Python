@@ -15,28 +15,32 @@ driver = webdriver.Firefox()
 driver.maximize_window()
 driver.get(URL)
 
-# wait for the GDPR agreement policy to load and click the button to agree to the terms
-try:
-    gdpr_agree_button = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.sc-ifAKCX:nth-child(2)'))
-    )
-    gdpr_agree_button.click()
-except:
-    print('GDPR agreement button not found or not clickable\n')
-
-
-more_exercises_button = driver.execute_script('return document.querySelector(".py-2 > button:nth-child(1)")')
-while True:
+# click "agree" button in GDPR popup window
+def accept_gdpr():
+    # wait for the GDPR agreement policy to load and click the button to agree to the terms
     try:
-        time.sleep(random.uniform(0.5, 1))
-        driver.execute_script("arguments[0].click();", more_exercises_button)
-        if more_exercises_button.is_enabled() == False:
-            print("Button is disabled")
-            break
+        gdpr_agree_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.sc-ifAKCX:nth-child(2)'))
+        )
+        gdpr_agree_button.click()
     except:
-        print("More exercises button not found or not clickable")
-        pass
+        print('GDPR agreement button not found or not clickable\n')
+accept_gdpr()
 
+# click "more exercises" button until all exercises are displayed on page
+def expand_exercises():
+    more_exercises_button = driver.execute_script('return document.querySelector(".py-2 > button:nth-child(1)")')
+    while True:
+        try:
+            time.sleep(random.uniform(0.5, 1))
+            driver.execute_script("arguments[0].click();", more_exercises_button)
+            if more_exercises_button.is_enabled() == False:
+                print("Button is disabled")
+                break
+        except:
+            print("More exercises button not found or not clickable")
+            pass
+expand_exercises()
 
 # extract the HTML content after all the exercises have been loaded
 html_content = driver.page_source
@@ -48,20 +52,12 @@ soup = BeautifulSoup(html_content, 'html.parser')
 exercise_items = soup.find_all('div', {'class': 'exerciseitem'})
 
 
-def getExerciseItemData():
-    # extract the url contained within the anchor tag
+def get_exercise_item_data():
     url = item.find('a')['href']
-
-    # extract the url contained in the image tag
     img_url = item.find('img')['data-src']
-
-    # extract the text contained within the span contained within the div of class "media-content"
     exercise_name = item.find('span').text.strip()
-
-    # extract the text contained within the second span contained within the div of class "media-content"
     exercise_records = item.find_all('span')[1].text.strip()
     
-    # write the extracted information to the output file
     writer.writerow([exercise_name, exercise_records, url, img_url])
 
     # print the extracted information
@@ -70,16 +66,11 @@ def getExerciseItemData():
     print(f'URL: {url}')
     print(f'Image URL: {img_url}\n')
 
-# open the output file for writing
+# write to file
 with info_file.open(mode='w', newline='', encoding='utf-8') as file:
-    # create a CSV writer object
     writer = csv.writer(file)
-
-    # write the header row
     writer.writerow(['Exercise Name', 'Exercise Records', 'URL', 'Image URL'])
-
-    # iterate over each exercise item and extract the required information
     for item in exercise_items:
-        getExerciseItemData()
+        get_exercise_item_data()
 
 
