@@ -89,10 +89,5 @@ def get_exercise_item_data():
 for item in exercise_items:
     get_exercise_item_data()
 
-'''# write to file
-with info_file.open(mode='w', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file)
-    writer.writerow(['Exercise Name', 'Exercise Records', 'URL', 'Image URL'])'''
-    
-
+driver.quit()
 

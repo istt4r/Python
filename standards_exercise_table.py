@@ -48,52 +48,37 @@ def scrape_exercise_data(driver, exercise_name, exercise_records, url, image_url
 
     # xpath definitions
     scroll_position_xpath = "//div[@data-tab-group='Standards Exercise']"
-    male_weight_xpath = "//body[1]/section[1]/div[1]/div[6]/div[2]/div[1]/div[3]/div[2]/div[1]/table[1]/tbody[1]/tr"
-    male_age_xpath = "//body[1]/section[1]/div[1]/div[6]/div[2]/div[1]/div[3]/div[3]/div[1]/table[1]/tbody[1]/tr"
-    female_weight_xpath = "//body[1]/section[1]/div[1]/div[6]/div[3]/div[1]/div[3]/div[2]/div[1]/table[1]/tbody[1]/tr"
-    female_age_xpath = "//body[1]/section[1]/div[1]/div[6]/div[3]/div[1]/div[3]/div[3]/div[1]/table[1]/tbody[1]/tr"
-
-    # Define the categories and genders to fetch data for
+    table_xpath = "//table[(ancestor::div[contains(@data-tab-group, 'By Weight and Age')])]//tr"
+    
+     # Define the categories and genders to fetch data for
     categories = ["weight", "age"]
     genders = ["male", "female"]
 
-    # Define today's date
     today = datetime.date.today()
 
-    # Wait for the GDPR agreement policy to load and click the button to agree to the terms
-    try:
-        gdpr_agree_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.sc-ifAKCX:nth-child(2)'))
-        )
-        gdpr_agree_button.click()
-    except:
-        print('GDPR agreement button not found or not clickable\n')
-
     # position the driver view optimally
-    def scroll_position(xpath):
+    def scroll_position_exercise(xpath):
         element = driver.find_element(By.XPATH, xpath)
         y_coord = element.location['y']
         driver.execute_script("window.scrollTo(0, {})".format(y_coord))
-    scroll_position(scroll_position_xpath)
+    scroll_position_exercise(scroll_position_xpath)
     
     table_data = []
     for gender in genders:
         for category in categories:
-            # Click the appropriate gender button
             if gender == "male":
                 male_button.click()
             elif gender == "female":
                 female_button.click()
 
-            # Click the appropriate category button
             if category == "weight":
                 weight_button = driver.find_element(By.XPATH, "//a[text()='By Bodyweight' and not(ancestor::div[contains(@class, 'is-hidden')])]")
                 weight_button.click()
-                table_xpath = male_weight_xpath if gender == "male" else female_weight_xpath
+                table_xpath = table_xpath if gender == "male" else table_xpath
             elif category == "age":
                 age_button = driver.find_element(By.XPATH, "//a[text()='By Age' and not(ancestor::div[contains(@class, 'is-hidden')])]")
                 age_button.click()
-                table_xpath = male_age_xpath if gender == "male" else female_age_xpath
+                table_xpath = table_xpath if gender == "male" else table_xpath
 
             # Get the table data
             data = get_table_data(driver, exercise_name, category, gender, table_xpath, today)
@@ -101,14 +86,6 @@ def scrape_exercise_data(driver, exercise_name, exercise_records, url, image_url
 
     # Merge all the data into one object
     merged_data = {'data': table_data}
-
-    '''# write merged_data to csv
-    merge_path = Path(SS_DATA_PATH) / f"{exercise_name}.csv"
-    with merge_path.open(mode='w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=list(merged_data['data'][0].keys()))
-        writer.writeheader()
-        for row in merged_data['data']:
-            writer.writerow(row)'''
             
     merge_path = Path(SS_DATA_PATH) / f"{exercise_name}.csv"
     with merge_path.open(mode='w', newline='') as csvfile:
@@ -118,7 +95,7 @@ def scrape_exercise_data(driver, exercise_name, exercise_records, url, image_url
             for row in merged_data['data']:
                 writer.writerow(row)
         else:
-            print('No data to write to CSV file')
+            print('No data to write to CSV file\n')
 
 
     # Save exercise records
