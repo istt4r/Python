@@ -79,21 +79,6 @@ def expand_exercises(driver):
             print("More exercises button not found or not clickable")
             pass
 
-"""
-def get_exercise_item_data(driver, item):
-    url = urljoin("https://strengthlevel.com", item.find('a')['href'])
-    img_url = item.find('img')['data-src']
-    web_exercise_name = item.find('span').text.strip()
-    exercise_records = item.find_all('span')[1].text.strip()
-
-    print(f'Exercise Name: {web_exercise_name}')
-    print(f'Exercise Records: {exercise_records}')
-    print(f'URL: {url}')
-    print(f'Image URL: {img_url}\n')
-
-    standards_exercise_table.scrape_exercise_data(driver, web_exercise_name, exercise_records, url, img_url)
-    driver.switch_to.window(driver.window_handles[0])
-"""
 def get_exercise_item_data(driver, item, exercise_mapping):
     """Extracts the exercise data from an exercise item."""
     url = urljoin("https://strengthlevel.com", item.find('a')['href'])
