@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from config import SS_DATA_PATH
 
 
-def get_table_data(driver, exercise_name, category, subcategory, gender, table_xpath):
+def get_table_data(driver, exercise, variant, device, category, subcategory, gender, table_xpath):
     if subcategory not in ["age", "bodyweight"]:
         raise ValueError("Invalid subcategory specified")
 
@@ -25,7 +25,9 @@ def get_table_data(driver, exercise_name, category, subcategory, gender, table_x
             continue
         columns = row.find_elements(By.TAG_NAME, "td")
         category_data = {
-            'exercise': exercise_name,
+            'exercise': exercise,
+            'variant': variant,
+            'device': device,
             'category': category,
             'gender': gender,
             'subcategory': subcategory,
@@ -40,12 +42,12 @@ def get_table_data(driver, exercise_name, category, subcategory, gender, table_x
     return table_data
 
 
-def scrape_exercise_data(driver, exercise_name, exercise_records, url, image_url):
+def scrape_exercise_data(driver, exercise, variant, device, exercise_records, url, image_url):
     driver.switch_to.new_window('tab')
     driver.get(url)
 
     # Define the subcategories and genders to fetch data for
-    categories = ["weightweight","repetitions"]
+    categories = ["weight","repetitions"]
     subcategories = ["bodyweight", "age"]
     genders = ["male", "female"]
     
@@ -59,12 +61,12 @@ def scrape_exercise_data(driver, exercise_name, exercise_records, url, image_url
     driver.execute_script("window.scrollTo(0, {})".format(y_coord))
     
     # Determine whether the exercise table numbers refer to repetitions completed (Bodyweight) or weight
-    category_label = driver.find_element_by_xpath("(//div[@class='tabs-container block'])[3]")
+    category_label = driver.find_element(By.XPATH, "(//div[@class='tabs-container block'])[3]")
     category_label_value = category_label.get_attribute("data-tab-group")
-    if "By Weight and Age" in category_label_value:
-        category = categories[0]  # "weight"
-    elif "Reps by Weight and Age" in category_label_value:
-        category = categories[1]  # "repetitions"
+    if "Reps By Weight and Age" in category_label_value:
+        category = categories[1]  # "weight"
+    elif "By Weight and Age" in category_label_value:
+        category = categories[0]  # "repetitions"
     else:
         category = None
 
@@ -88,14 +90,16 @@ def scrape_exercise_data(driver, exercise_name, exercise_records, url, image_url
             table_xpath = "//table[(ancestor::div[contains(@data-tab-group, 'By Weight and Age')])]//tr"
             if gender == "female":
                 table_xpath += "[not(contains(@class, 'male'))]"
-            data = get_table_data(driver, exercise_name, category, subcategory, gender, table_xpath)
+            data = get_table_data(driver, exercise, variant, device, category, subcategory, gender, table_xpath)
             table_data.extend(data)
+
+    
 
     # Merge all the data into one object
     merged_data = {'data': table_data}
 
     # Write the data to a CSV file
-    merge_path = Path(SS_DATA_PATH) / f"{exercise_name}.csv"
+    merge_path = Path(SS_DATA_PATH) / f"{exercise}.csv"
     with merge_path.open(mode='w', newline='') as csvfile:
         if merged_data['data']:
             writer = csv.DictWriter(csvfile, fieldnames=list(merged_data['data'][0].keys()))
@@ -105,9 +109,8 @@ def scrape_exercise_data(driver, exercise_name, exercise_records, url, image_url
         else:
             print('No data to write to CSV file\n')
 
-
     # Save exercise records
     with open(f"{SS_DATA_PATH}/exercise_details.txt", "a") as file:
-        file.write(f"{exercise_name},{exercise_records},{url},{image_url}\n")
+        file.write(f"{exercise},{variant},{device},{exercise_records},{url},{image_url}\n")
         
     driver.close()

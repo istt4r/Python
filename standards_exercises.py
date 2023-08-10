@@ -13,6 +13,36 @@ from selenium.webdriver.support import expected_conditions as EC
 from config import URL, SS_INFO_PATH
 import standards_exercise_table
 
+# Create a mapping dictionary
+exercise_mapping = {
+    "cable crunch": ["crunch", "standard", "cable"],
+    "cable overhead tricep extension": ["tricep extension", "overhead", "cable"],
+    "chest press": ["bench press", "standard", "machine"],
+    "decline bench press": ["bench press", "decline", "barbell"],
+    "dips": ["dip", "standard", "machine"],
+    "dumbbell curl": ["bicep curl", "standard", "dumbbell"],
+    "dumbbell lateral raise": ["lateral raise", "standard", "dumbbell"],
+    "hip abduction": ["hip abduction", "standard", "machine"],
+    "hip adduction": ["hip adduction", "standard", "machine"],
+    "hip thrust": ["hip thrust", "standard", "barbell"],
+    "incline bench press": ["bench press", "incline", "barbell"],
+    "lat pulldown": ["pulldown", "standard", "machine"],
+    "leg extension": ["leg extension", "standard", "machine"],
+    "machine back extension": ["back extension", "standard", "machine"],
+    "machine calf raise": ["calf raise", "standard", "machine"],
+    "machine chest fly": ["fly", "standard", "machine"],
+    "machine reverse fly": ["fly", "reverse", "machine"],
+    "machine shoulder press": ["shoulder press", "standard", "machine"],
+    "machine shrug": ["shrug", "standard", "machine"],
+    "pull ups": ["pull up", "standard", "machine"],
+    "reverse barbell curl": ["bicep curl", "reverse", "barbell"],
+    "reverse grip lat pulldown": ["pulldown", "supinated", "machine"],
+    "seated cable row": ["row", "standard", "machine"],
+    "tricep pushdown": ["tricep extension", "standard", "cable"],
+    "sled leg press": ["leg press", "standard", "machine"],
+    "standing leg curl": ["hamstring curl", "standard", "machine"],
+    "smith machine squat": ["squat", "standard", "machine"],
+}
 
 def accept_gdpr(driver):
     """Clicks the "Agree" button in the GDPR popup window."""
@@ -49,21 +79,42 @@ def expand_exercises(driver):
             print("More exercises button not found or not clickable")
             pass
 
-
+"""
 def get_exercise_item_data(driver, item):
-    """Extracts the exercise data from an exercise item."""
     url = urljoin("https://strengthlevel.com", item.find('a')['href'])
     img_url = item.find('img')['data-src']
-    exercise_name = item.find('span').text.strip()
+    web_exercise_name = item.find('span').text.strip()
     exercise_records = item.find_all('span')[1].text.strip()
 
-    print(f'Exercise Name: {exercise_name}')
+    print(f'Exercise Name: {web_exercise_name}')
     print(f'Exercise Records: {exercise_records}')
     print(f'URL: {url}')
     print(f'Image URL: {img_url}\n')
 
-    standards_exercise_table.scrape_exercise_data(driver, exercise_name, exercise_records, url, img_url)
+    standards_exercise_table.scrape_exercise_data(driver, web_exercise_name, exercise_records, url, img_url)
     driver.switch_to.window(driver.window_handles[0])
+"""
+def get_exercise_item_data(driver, item, exercise_mapping):
+    """Extracts the exercise data from an exercise item."""
+    url = urljoin("https://strengthlevel.com", item.find('a')['href'])
+    img_url = item.find('img')['data-src']
+    web_exercise_name = item.find('span').text.strip()
+    exercise_records = item.find_all('span')[1].text.strip()
+
+    # Check if web_exercise_name is in the mapping dictionary
+    if web_exercise_name in exercise_mapping:
+        mapped_data = exercise_mapping[web_exercise_name]
+        exercise, variant, device = mapped_data
+        
+        print(f'Exercise: {exercise}')
+        print(f'Variant: {variant}')
+        print(f'Device: {device}')
+        print(f'Exercise Records: {exercise_records}')
+        print(f'URL: {url}')
+        print(f'Image URL: {img_url}\n')
+
+        standards_exercise_table.scrape_exercise_data(driver, exercise, variant, device, exercise_records, url, img_url)
+        driver.switch_to.window(driver.window_handles[0])
 
 
 # Set the path and filename for the output file
@@ -93,6 +144,6 @@ with webdriver.Firefox() as driver:
     exercise_items = soup.find_all('div', {'class': 'exerciseitem'})
 
     for item in exercise_items:
-        get_exercise_item_data(driver, item)
+        get_exercise_item_data(driver, item, exercise_mapping)
 
     driver.quit()
