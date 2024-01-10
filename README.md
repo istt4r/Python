@@ -9,7 +9,7 @@ This repository is the storatge of a collection of scripts that I have used in t
 
 <b>ArchiveWorkout</b> - Handles processing the RAW export folder received from Notion. This script explores to folder tree, searching for new workouts, renaming them to a uniform format which includes the workout name and date. The output files are then staged for uploading to the google sheet using Google Sheet API's. 
 
-<b>Standards_Exercise</b> - These scripts are related to the operation of the web scraping project. This involves navigating to [strengthlevels.comn](https://strengthlevel.com/strength-standards) and then proceduraly exports the relevant exercise data into a .csv file for later comparisons against my own data.
+<b>Standards_Exercise</b> - These scripts are related to the operation of the web scraping project. This involves navigating to [strengthlevels.com](https://strengthlevel.com/strength-standards) and then proceduraly exports the relevant exercise data into a .csv file for later comparisons against my own data.
 
 <b>Polynomial Regression</b> - Using the data collected from my "smart" weight scale, this script served as an opportunity to utilise the Numpy library from Python. This was done to utilise polynomial regression to create a line of best fit for the data, for further statistical exploration/graphing.
 
