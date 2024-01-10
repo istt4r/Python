@@ -4,6 +4,8 @@ This repository is the storatge of a collection of scripts that I have used in t
 
 <b>Demo viewable at:</b> https://docs.google.com/spreadsheets/d/1ViopvzfCvcuMv_1Ps0EqNGq_oKcRmZjA-HzWX9F42ik/edit#gid=1188826729
 
+<b>Webscraping Project:</b> https://jclaverie.notion.site/jclaverie/Personal-Projects-010c5dd5e66341cb8acc1f122a30f545
+
 <h2>Functions:</h2>
 
 
